@@ -42,6 +42,17 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
+app.post("/urls/update/:shortURL",(req, res)=> {
+  let shortUrl = req.params.shortURL
+
+    res.redirect(`/urls/${shortUrl}`)
+  })
+  app.post("/urls/:shortURL", (req, res) => {
+    let shorturl = req.params.shortURL
+    let longurl = req.body.longURL
+    urlDatabase[shorturl] = longurl 
+    res.redirect("/urls")
+  })
 app.post("/urls/delete/:keys", (req, res) => {
   // const idontknow = req.body.information
   // console.log(idontknow)
@@ -67,7 +78,8 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortUrl = generateRandomString();
   urlDatabase[shortUrl] = req.body.longURL;
-  console.log(urlDatabase); // Log the POST request body to the console
+  console.log(req.body)
+  /* console.log(urlDatabase); */ // Log the POST request body to the console
   res.redirect(`/urls/${shortUrl}`); // Respond with 'Ok' (we will replace this)
 });
 
