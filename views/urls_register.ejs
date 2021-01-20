@@ -18,16 +18,15 @@
   </head>
 
   <body>
-    
+    <%- include('partials/_header') %>
 
     <main>
       <h1>Register</h1>
-    
+
       <form method="POST" action="/register">
-        <input type="email" name="email">
-        <input type="password" name="password">
-        <button class="btn btn-outline-primary" type="submit">
-        </button>
+        <input type="email" name="email" />
+        <input type="password" name="password" />
+        <button class="btn btn-outline-primary" type="submit"></button>
       </form>
     </main>
     <!-- Bootstrap JS -->
