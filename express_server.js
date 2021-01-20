@@ -38,11 +38,6 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 app.get("/urls", (req, res) => {
-  // const templateVars = {
-  //   username: req.cookies["username"],
-  //   // ... any other vars
-  // };
-  // res.render("urls_index", templateVars);
 
   const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_index", templateVars);
@@ -60,8 +55,6 @@ app.post("/urls/update/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   res.cookie("username", req.body.username);
 
-  console.log(req.body.username);
-  // console.log(req);
   res.redirect(`/urls`);
 });
 app.post("/logout", (req, res) => {
@@ -76,19 +69,11 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 app.post("/urls/delete/:keys", (req, res) => {
-  // const idontknow = req.body.information
-  // console.log(idontknow)
+
   const shortUrl = req.params.keys;
   delete urlDatabase[shortUrl];
   res.redirect("/urls");
-  // console.log(req.params.keys)
 
-  // let shorturl =req.params.shortURL
-  // let key = urlDatabase[shorturl]
-
-  // console.log("delete")
-
-  // res.redirect("/urls")
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -104,8 +89,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortUrl = generateRandomString();
   urlDatabase[shortUrl] = req.body.longURL;
-  console.log(req.body); // Log the POST request body to the console
-  /* console.log(urlDatabase); */ res.redirect(`/urls/${shortUrl}`); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortUrl}`); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -113,7 +97,4 @@ app.get("/u/:shortURL", (req, res) => {
 
   res.redirect(`http://${link}`);
 
-  //   console.log(x)
-
-  // // if(link === )
 });
