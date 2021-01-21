@@ -21,17 +21,17 @@
     <%- include('partials/_header') %>
 
     <main style="margin: 1em">
-      <h3>Create Account</h3>
+      <h3>Login</h3>
       <h4>Email Address</h4>
 
-      <form method="POST" action="/register">
+      <form method="POST" action="/login">
         <input type="email" name="email" placeholder="Enter Email" />
         <h4 style="margin-top: 1em">Password</h4>
         <div>
-          <input type="password" name="password" placeholder="Enter Password" />
+          <input type="password" name="password" placeholder="Enter password" />
         </div>
         <div style="margin-top: 1em">
-          <button class="btn btn-primary" type="submit">Register</button>
+          <button class="btn btn-primary" type="submit">Login</button>
         </div>
       </form>
     </main>
