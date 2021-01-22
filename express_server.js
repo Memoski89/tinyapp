@@ -2,17 +2,18 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
-app.use(cookieParser());
+const bcrypt = require("bcrypt");
+
+const cookieSession = require("cookie-session");
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["key1", "key2"],
+  })
+);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
-const bcrypt = require('bcrypt');
-const password = "purple-monkey-dinosaur"; // found in the req.params object
-const hashedPassword = bcrypt.hashSync(password, 10);
-
-
-// pretty self explantory but this function will be used to generate a random id
 const generateRandomString = function () {
   let randomString = "";
   let characters =
@@ -24,18 +25,58 @@ const generateRandomString = function () {
   }
   return randomString;
 };
-let getUrlspecfic= function(userId){
+
+let getUrlspecfic = function (userId) {
   let result = {};
-  for(let t in urlDatabase){
-    if(urlDatabase[t].userID=== userId){
-      result[t] = urlDatabase[t].longURL
+  for (let t in urlDatabase) {
+    if (urlDatabase[t].userID === userId) {
+      result[t] = urlDatabase[t].longURL;
     }
-  } return result
+  }
+  return result;
+};
+const emailChecker = function (item) {
+  for (const keys in users) {
+    if (users[keys].email === item) {
+      return true;
+    }
+  }
+  return false;
+};
+const passwordChecker = function (email, password) {
+  for (const keys in users) {
+    console.log(users[keys].password);
+    if (
+      users[keys].email === email &&
+      bcrypt.compareSync(password, users[keys].password)
+    ) {
+      return true;
+    }
+  }
+  return false;
+};
+const getUserId = function (email, password) {
+  for (const key in users) {
+    if (
+      users[key].email === email &&
+      bcrypt.compareSync(password, users[key].password)
+    ) {
+      return key;
+    }
+  }
+};
+let getUserByEmail = function(email, database){
+  for(const key in database){
+     if(database[key].email === email){
+       return database[key]
+     }
+  }return null
 }
 
+
 const urlDatabase = {
-  b2xVn2: {longURL:"http://www.lighthouselabs.ca", userID: "userRandomID"},
-  "9sm5xK": { longURL: "http://www.google.com", userID: "aJ48lW" }
+  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "aJ48lW" },
 };
 
 const users = {
@@ -50,31 +91,7 @@ const users = {
     password: "dishwasher-funk",
   },
 };
-const emailChecker = function (item) {
-  for (const keys in users) {
-    if (users[keys].email === item) {
-      return true;
-    }
-  }
-  return false;
-};
-const passwordChecker = function (email, password) {
-  for (const keys in users) {
-    console.log(users[keys].password)
-    if (users[keys].email === email && bcrypt.compareSync(password, users[keys].password)) {
-      return true;
-    }
-  }
-  return false;
-};
-const getUserId = function (email, password) {
-  for (const key in users) {
-    if (users[key].email === email && bcrypt.compareSync(password, users[key].password)){
-      return key;
-    }
-  }
-};
-// this is to test
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -86,46 +103,46 @@ app.listen(PORT, () => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-// this is also a test
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// }
-
 app.get("/urls", (req, res) => {
-  let userId = req.cookies["user_id"];
-  let value = getUrlspecfic(userId)
-  let templateVars = { urls: value, user: users[userId]};
-  if(userId === undefined){
-    res.redirect('/register')
+  let userId = req.session["user_id"];
+  let value = getUrlspecfic(userId);
+  let templateVars = { urls: value, user: users[userId] };
+  if (userId === null) {
+    res.redirect("/register");
   }
 
   res.render("urls_index", templateVars);
 });
 app.post("/urls", (req, res) => {
   let shortUrl = generateRandomString();
-  let userId = req.cookies["user_id"];
-  let result = {longURL: req.body.longURL, userID: userId};
+  
+  let userId = req.session["user_id"];
+  let result = { longURL: req.body.longURL, userID: userId };
   urlDatabase[shortUrl] = result;
 
-  res.redirect(`/urls/${shortUrl}`); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${shortUrl}`); 
 });
 
 app.get("/register", (req, res) => {
-  console.log("hello");
-  let userId = req.cookies["user_id"];
-  const templateVars = { user: null};
-  // console.log(templateVars.user);
+
+
+
+  const templateVars = { user: null };
+  
   res.render("urls_register", templateVars);
 });
 
 app.post("/register", (req, res) => {
-  // console.log(JSON.stringify(req.body));
+
   let newEmail = req.body.email;
   let newPassword = req.body.password;
   let randomId = generateRandomString();
-  const hashedPassword = bcrypt.hashSync(newPassword, 10);
+  let hashedPassword = bcrypt.hashSync(newPassword, 10);
 
   if (newEmail === "" || newPassword === "") {
     res.send("404 please insert an actual email/password");
@@ -139,15 +156,16 @@ app.post("/register", (req, res) => {
     };
 
     users[randomId] = newuser;
-    res.cookie("user_id", randomId);
-    // console.log(users);
+    
+    req.session["user_id"] = randomId;
+
     res.redirect("/urls");
   }
-  console.log(users)
+
 });
 
 app.get("/login", (req, res) => {
-  let userId = req.cookies["user_id"];
+  let userId = req.session["user_id"];
   const templateVars = { urls: urlDatabase, user: users[userId] };
   res.render("urls_login", templateVars);
 });
@@ -157,25 +175,24 @@ app.post("/login", (req, res) => {
   }
   if (passwordChecker(req.body.email, req.body.password)) {
     let exactKey = getUserId(req.body.email, req.body.password);
-    console.log("label", exactKey);
-
-    // console.log('here')
-    res.cookie("user_id", exactKey);
+    req.session["user_id"] = exactKey;
     res.redirect(`/urls`);
   } else {
     res.send("404 wrong password");
   }
 });
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  
+  req.session["user_id"] = null;
   res.redirect(`/urls`);
 });
 
 app.get("/urls/new", (req, res) => {
-  let userId = req.cookies["user_id"];
+  
+  let userId = req.session["user_id"];
   const templateVars = { user: users[userId] };
-  if(userId === undefined){
-    res.redirect('/login')
+  if (userId === null) {
+    res.send("404 please login");
   }
   res.render("urls_new", templateVars);
 });
@@ -189,15 +206,16 @@ app.post("/urls/update/:shortURL", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   let shorturl = req.params.shortURL;
   let longurl = req.body.longURL;
-  let idValue = req.cookies['user_id']
-  let result = {longURL: longurl, userID: idValue }
+  let idValue = req.session["user_id"];
+  let result = { longURL: longurl, userID: idValue };
   urlDatabase[shorturl] = result;
   res.redirect("/urls");
 });
 app.post("/urls/delete/:keys", (req, res) => {
-  let userId = req.cookies["user_id"];
-  if(!getUrlspecfic(userId)){
-    res.redirect("/login")
+  
+  let userId = req.session["user_id"];
+  if (!getUrlspecfic(userId)) {
+    res.redirect("/login");
   }
   const shortUrl = req.params.keys;
   delete urlDatabase[shortUrl];
@@ -206,7 +224,8 @@ app.post("/urls/delete/:keys", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let userId = req.cookies["user_id"];
+  
+  let userId = req.session["user_id"];
   let shorturl = req.params.shortURL;
   const longurl = urlDatabase[shorturl];
   const templateVars = {
@@ -218,14 +237,13 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let userId = req.cookies["user_id"];
-  let usersUrl =getUrlspecfic(userId)
+  let userId = req.session["user_id"];
+  let usersUrl = getUrlspecfic(userId);
   const link = usersUrl[req.params.shortURL];
-  console.log(usersUrl)
-  
+
   if (link.startsWith("http://")) {
     res.redirect(link);
-  } else{
+  } else {
     res.redirect(`http://${link}`);
   }
 });
