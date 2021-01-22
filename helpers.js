@@ -1,12 +1,16 @@
-let getUserByEmail = function(email, database){
-  for(const key in database){
-     if(database[key].email === email){
-       return database[key]
-     }
-  }return null
-}
+const bcrypt = require("bcrypt");
 
-const emailChecker = function (item) {
+let getUrlspecfic = function (userId, database) {
+  let result = {};
+  for (let t in database) {
+    if (database[t].userID === userId) {
+      result[t] = database[t].longURL;
+    }
+  }
+  return result;
+};
+
+const emailChecker = function (item, users) {
   for (const keys in users) {
     if (users[keys].email === item) {
       return true;
@@ -14,17 +18,28 @@ const emailChecker = function (item) {
   }
   return false;
 };
+const getUserByEmail = function(email, database) {
+  for(let user in database){
+    if(database[user].email === email){
+      return database[user];
+    }
 
-const passwordChecker = function (email, password) {
+  }
+  return undefined
+};
+
+const passwordChecker = function (email, password, users) {
   for (const keys in users) {
     if (users[keys].email === email && bcrypt.compareSync(password, users[keys].password)) {
       return true;
     }
-  }
-  return false;
+  } return false;passwordChe
 };
+ 
 
-const getUserId = function (email, password) {
+
+
+const getUserId = function (email, password, users) {
   for (const key in users) {
     if (users[key].email === email && bcrypt.compareSync(password, users[key].password)){
       return key;
@@ -45,4 +60,4 @@ const generateRandomString = function () {
 };
 
 
-module.exports = {getUserByEmail, emailChecker, passwordChecker, getUserId, generateRandomString}
+module.exports = {getUrlspecfic, emailChecker, passwordChecker, getUserId, generateRandomString, getUserByEmail } /* emailChecker, passwordChecker, getUserId, generateRandomString */
