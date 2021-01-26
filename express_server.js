@@ -46,7 +46,7 @@ app.get("/urls.json", (req, res) => {
   res.json(database);
 });
 
-// IF user is not recognized sent an error, else rendered normally
+// IF user is not recognized sent an error, else rendered urls_ index normally
 app.get("/urls", (req, res) => {
   let userId = req.session["user_id"];
   let value = getUrlspecfic(userId, urlDatabase);
@@ -58,7 +58,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//
 app.post("/urls", (req, res) => {
   let shortUrl = generateRandomString();
 
@@ -68,14 +67,14 @@ app.post("/urls", (req, res) => {
 
   res.redirect(`/urls/${shortUrl}`);
 });
-
+// registration page
 app.get("/register", (req, res) => {
   const templateVars = { user: null };
 
   res.render("urls_register", templateVars);
 });
-// multiple checks to verfiy if a new email/existing email/ valid password
 
+// multiple checks to verfiy if a new email/existing email/ valid password
 app.post("/register", (req, res) => {
   let newEmail = req.body.email;
   let newPassword = req.body.password;
@@ -101,11 +100,13 @@ app.post("/register", (req, res) => {
   }
 });
 
+//login page
 app.get("/login", (req, res) => {
   let userId = req.session["user_id"];
   const templateVars = { urls: urlDatabase, user: users[userId] };
   res.render("urls_login", templateVars);
 });
+//checks to see if email exists or if password is valid then redirects to urls page
 app.post("/login", (req, res) => {
   if (!emailChecker(req.body.email, users)) {
     return res.send("403 email does not exist");
@@ -118,11 +119,12 @@ app.post("/login", (req, res) => {
     res.send("404 wrong password");
   }
 });
+//when you logout redirects you to urls, but it should give you an error because persons who are not logged in cannot access urls
 app.post("/logout", (req, res) => {
   req.session["user_id"] = null;
   res.redirect(`/urls`);
 });
-
+// if user is not logged in cannot access this new urls pag
 app.get("/urls/new", (req, res) => {
   let userId = req.session["user_id"];
   const templateVars = { user: users[userId] };
@@ -132,12 +134,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// short urls page
+
 app.post("/urls/update/:shortURL", (req, res) => {
   let shortUrl = req.params.shortURL;
 
   res.redirect(`/urls/${shortUrl}`);
 });
-
+// once again another check if user is not logged in will send an error otherwise redirects to urls
 app.post("/urls/:shortURL", (req, res) => {
   let userId = req.session["user_id"];
   if (!userId) {
@@ -151,6 +155,7 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
+// deletes user created urls and if another user is logged on simultaneously it will send an error
 app.post("/urls/delete/:keys", (req, res) => {
   const userId = req.session.user_id;
   const shortUrl = req.params.keys;
@@ -164,6 +169,7 @@ app.post("/urls/delete/:keys", (req, res) => {
   res.redirect("/urls");
 });
 
+//another error message if user is not logged in and access this page
 app.get("/urls/:shortURL", (req, res) => {
   let userId = req.session["user_id"];
   if (!userId) {
