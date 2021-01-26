@@ -18,30 +18,34 @@ const emailChecker = function (item, users) {
   }
   return false;
 };
-const getUserByEmail = function(email, database) {
-  for(let user in database){
-    if(database[user].email === email){
+const getUserByEmail = function (email, database) {
+  for (let user in database) {
+    if (database[user].email === email) {
       return database[user];
     }
-
   }
-  return undefined
+  return undefined;
 };
 
 const passwordChecker = function (email, password, users) {
   for (const keys in users) {
-    if (users[keys].email === email && bcrypt.compareSync(password, users[keys].password)) {
+    if (
+      users[keys].email === email &&
+      bcrypt.compareSync(password, users[keys].password)
+    ) {
       return true;
     }
-  } return false;passwordChe
+  }
+  return false;
+  passwordChe;
 };
- 
-
-
 
 const getUserId = function (email, password, users) {
   for (const key in users) {
-    if (users[key].email === email && bcrypt.compareSync(password, users[key].password)){
+    if (
+      users[key].email === email &&
+      bcrypt.compareSync(password, users[key].password)
+    ) {
       return key;
     }
   }
@@ -59,5 +63,11 @@ const generateRandomString = function () {
   return randomString;
 };
 
-
-module.exports = {getUrlspecfic, emailChecker, passwordChecker, getUserId, generateRandomString, getUserByEmail } /* emailChecker, passwordChecker, getUserId, generateRandomString */
+module.exports = {
+  getUrlspecfic,
+  emailChecker,
+  passwordChecker,
+  getUserId,
+  generateRandomString,
+  getUserByEmail,
+}; /* emailChecker, passwordChecker, getUserId, generateRandomString */

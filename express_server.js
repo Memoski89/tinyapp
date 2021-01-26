@@ -52,13 +52,13 @@ app.get("/urls", (req, res) => {
   let value = getUrlspecfic(userId, urlDatabase);
   let templateVars = { urls: value, user: users[userId] };
   if (!userId) {
-   return res.send("Please login to see Urls");
+    return res.send("Please login to see Urls");
   }
 
   res.render("urls_index", templateVars);
 });
 
-// 
+//
 app.post("/urls", (req, res) => {
   let shortUrl = generateRandomString();
 
@@ -108,7 +108,7 @@ app.get("/login", (req, res) => {
 });
 app.post("/login", (req, res) => {
   if (!emailChecker(req.body.email, users)) {
-   return res.send("403 email does not exist");
+    return res.send("403 email does not exist");
   }
   if (passwordChecker(req.body.email, req.body.password, users)) {
     let exactKey = getUserId(req.body.email, req.body.password, users);
@@ -141,8 +141,8 @@ app.post("/urls/update/:shortURL", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   let userId = req.session["user_id"];
   if (!userId) {
-   return res.send("Please login to see Urls");
-  } 
+    return res.send("Please login to see Urls");
+  }
   let shorturl = req.params.shortURL;
   let longurl = req.body.longURL;
   let idValue = req.session["user_id"];
@@ -157,20 +157,18 @@ app.post("/urls/delete/:keys", (req, res) => {
 
   // if short url exists in database && UserID matches current userID
 
-  if (urlDatabase[shortUrl] && urlDatabase[shortUrl].userID !== userId){
-   return res.status(403).send("This url doesn't belong to you");
+  if (urlDatabase[shortUrl] && urlDatabase[shortUrl].userID !== userId) {
+    return res.status(403).send("This url doesn't belong to you");
   }
   delete urlDatabase[shortUrl];
   res.redirect("/urls");
 });
-  
 
 app.get("/urls/:shortURL", (req, res) => {
-  
   let userId = req.session["user_id"];
   if (!userId) {
-   return res.send("Please login to see Urls");
-  } 
+    return res.send("Please login to see Urls");
+  }
   let shorturl = req.params.shortURL;
   const longurl = urlDatabase[shorturl];
   const templateVars = {
@@ -182,7 +180,6 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-
   const link = urlDatabase[req.params.shortURL].longURL;
 
   if (link.startsWith("http://")) {
