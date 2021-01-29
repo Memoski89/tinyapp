@@ -143,6 +143,7 @@ app.post("/urls/update/:shortURL", (req, res) => {
 });
 // once again another check if user is not logged in will send an error otherwise redirects to urls
 app.post("/urls/:shortURL", (req, res) => {
+  
   let userId = req.session["user_id"];
   if (!userId) {
     return res.send("Please login to see Urls");
@@ -168,12 +169,16 @@ app.post("/urls/delete/:keys", (req, res) => {
   delete urlDatabase[shortUrl];
   res.redirect("/urls");
 });
-
 //another error message if user is not logged in and access this page
 app.get("/urls/:shortURL", (req, res) => {
+
   let userId = req.session["user_id"];
+  
   if (!userId) {
     return res.send("Please login to see Urls");
+  }
+  if(userId !==  urlDatabase[req.params.shortURL].userID){
+    return res.send("These are not the urls you're looking for")
   }
   let shorturl = req.params.shortURL;
   const longurl = urlDatabase[shorturl];
